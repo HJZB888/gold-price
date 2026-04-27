@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇聚珠宝 - 黄金回收实时报价</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+        body{background:#f8f5f0;padding:15px}
+        .main{max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 10px rgba(0,0,0,0.1)}
+        .head{background:linear-gradient(90deg,#ffd700,#ffb300);color:#333;padding:20px;text-align:center}
+        .logo-box{width:100px;height:100px;margin:0 auto 15px;border-radius:50%;overflow:hidden;background:#fff}
+        .logo-box img{width:100%;height:100%;display:block;object-fit:cover}
+        .head h1{font-size:22px;margin-bottom:5px}
+        .time{font-size:14px;color:#555;margin-top:5px}
+        .price-table{width:100%;border-collapse:collapse;margin:15px 0}
+        .price-table th,.price-table td{padding:14px;text-align:center;border-bottom:1px solid #f0f0f0}
+        .price-table th{background:#fafafa;color:#666}
+        .up{font-size:19px;font-weight:bold;color:#ff3333}
+        .down{font-size:19px;font-weight:bold;color:#339933}
+        .high{color:#ff3333;font-size:14px}
+        .low{color:#339933;font-size:14px}
+        .tip{background:#ffeb3b;color:#333;padding:12px;text-align:center;font-size:14px}
+        .intro-box{padding:15px;font-size:14px;color:#555;line-height:1.6}
+        .qrcode{text-align:center;padding:15px}
+        .qrcode img{width:120px;height:120px;margin:0 auto}
+        .qrcode p{margin-top:8px;color:#666}
+        .notice-box{background:#f5f5f5;padding:15px;font-size:16px;color:#333;line-height:1.8}
+        .disclaimer{padding:15px;font-size:12px;color:#777;line-height:1.6;background:#f9f9f9}
+        .copyright{text-align:center;padding:15px;color:#777;font-size:14px}
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="head">
+            <div class="logo-box">
+                <img src="logo.png" alt="汇聚Logo">
+            </div>
+            <h1>汇聚珠宝</h1>
+            <p>黄金 | 铂金 | 钯金 | K金 | 白银 回收</p>
+            <div class="time" id="showTime">数据加载中...</div>
+        </div>
+
+        <table class="price-table">
+            <tr>
+                <th>回收品类</th>
+                <th>回收价（元/克）</th>
+                <th>高低行情</th>
+            </tr>
+            <tr>
+                <td>足金999</td>
+                <td class="up" id="p_gold999">--</td>
+                <td><div class="high" id="h_gold999">--</div><div class="low" id="l_gold999">--</div></td>
+            </tr>
+            <tr>
+                <td>22K金</td>
+                <td class="up" id="p_gold22k">--</td>
+                <td><div class="high" id="h_gold22k">--</div><div class="low" id="l_gold22k">--</div></td>
+            </tr>
+            <tr>
+                <td>18K金</td>
+                <td class="up" id="p_gold18k">--</td>
+                <td><div class="high" id="h_gold18k">--</div><div class="low" id="l_gold18k">--</div></td>
+            </tr>
+            <tr>
+                <td>PT999铂金</td>
+                <td class="down" id="p_pt999">--</td>
+                <td><div class="high" id="h_pt999">--</div><div class="low" id="l_pt999">--</div></td>
+            </tr>
+            <tr>
+                <td>Pd990钯金</td>
+                <td class="down" id="p_pd990">--</td>
+                <td><div class="high" id="h_pd990">--</div><div class="low" id="l_pd990">--</div></td>
+            </tr>
+            <tr>
+                <td>足银999</td>
+                <td class="down" id="p_silver">--</td>
+                <td><div class="high" id="h_silver">--</div><div class="low" id="l_silver">--</div></td>
+            </tr>
+        </table>
+
+        <div class="tip">本报价仅供参考，实际回收价格以门店当日实时标价为准</div>
+
+        <div class="intro-box">
+            <strong>店铺介绍：</strong><br>
+            泸水市汇聚珠宝，专业黄金奢侈品回收，诚信经营，报价透明，无折旧、无扣损、无套路，现场称重当场结算。<br>
+            主营业务：专业回收黄金、铂金、钯金、K金、白银、钻石、翡翠、名表、名酒。
+        </div>
+
+        <div class="notice-box">
+            📍地址：云南省怒江州泸水市大练地街道望江御府12栋S13-1<br>
+            📞电话：18288804987<br>
+            ⏰营业时间：09:00—21:00
+        </div>
+
+        <div class="qrcode">
+            <img src="qrcode.png" alt="微信咨询二维码">
+            <p>微信扫码咨询</p>
+        </div>
+
+        <div class="disclaimer">
+            <strong>免责声明：</strong><br>
+            1、本网站若有侵犯版权的内容，请联系纠正。<br>
+            2、本网站提供的信息仅供参考，本公司保留合法解释权。<br>
+            声明：以上行情仅供参考！
+        </div>
+
+        <div class="copyright">© 2026 汇聚珠宝 版权所有</div>
+    </div>
+
+<script>
+const PRICE_FILE = "./price.json";
+
+async function loadPriceData() {
+    const timeDom = document.getElementById("showTime");
+    timeDom.innerText = "正在获取实时大盘...";
+    timeDom.style.color="#666";
+
+    try {
+        const res = await fetch(PRICE_FILE, { cache: "no-store" });
+        if (!res.ok) throw new Error("暂无数据");
+        const d = await res.json();
+
+        document.getElementById("p_gold999").innerText = d.gold999 || "--";
+        document.getElementById("p_gold22k").innerText = d.k22 || "--";
+        document.getElementById("p_gold18k").innerText = d.k18 || "--";
+        document.getElementById("p_pt999").innerText = d.pt999 || "--";
+        document.getElementById("p_pd990").innerText = d.pd999 || "--";
+        document.getElementById("p_silver").innerText = d.silver999 || "--";
+
+        function setHighLow(idVal,idHigh,idLow){
+            let val = parseFloat(document.getElementById(idVal).innerText);
+            if(!isNaN(val)){
+                document.getElementById(idHigh).innerText = "最高 "+(val*1.01).toFixed(2);
+                document.getElementById(idLow).innerText = "最低 "+(val*0.99).toFixed(2);
+            }
+        }
+        setHighLow("p_gold999","h_gold999","l_gold999");
+        setHighLow("p_pt999","h_pt999","l_pt999");
+        setHighLow("p_pd990","h_pd990","l_pd990");
+        setHighLow("p_silver","h_silver","l_silver");
+
+        timeDom.innerText = "最新更新：" + (d.updateTime || new Date().toLocaleString());
+        timeDom.style.color="#096";
+
+    } catch (e) {
+        timeDom.innerText = "等待价格生成中...请稍候";
+        timeDom.style.color="#f33";
+    }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+    loadPriceData();
+    setInterval(loadPriceData, 60000);
+});
+window.addEventListener("online",()=>loadPriceData());
+</script>
+</body>
+</html>
