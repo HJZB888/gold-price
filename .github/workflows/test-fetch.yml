@@ -1,0 +1,43 @@
+name: 云端金价采集-制品模式
+on:
+  workflow_dispatch:
+  schedule:
+    cron: '* * * * *'
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 抓取并生成价格文件
+        run: |
+          import requests, json, time
+          headers = {"User-Agent":"Mozilla/5.0"}
+          url = "https://www.rtgold.com/api/quote"
+          res = requests.get(url, headers=headers, timeout=15)
+          d = res.json()
+          gold_base = float(d["gold"])
+          pt_base = float(d["platinum"])
+          pd_base = float(d["palladium"])
+          ag_base = float(d["silver"])
+
+          resData = {
+            "updateTime": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "gold999": round(gold_base - 20),
+            "k22": round((gold_base - 20) * 0.916),
+            "k18": round((gold_base - 20) * 0.75),
+            "pt999": round(pt_base - 60),
+            "pd990": round(pd_base - 80),
+            "silver999": round(ag_base - 5)
+          }
+          with open("price.json", "w", encoding="utf-8") as f:
+              json.dump(resData, f, ensure_ascii=False, indent=2)
+        shell: python
+
+      - name: 上传价格文件为制品
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-file
+          path: price.json
