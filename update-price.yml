@@ -1,50 +1,37 @@
 name: Update Gold Price
 
 on:
-  schedule:
-    - cron: '*/1 * * * *'
   workflow_dispatch:
-  push:
-    paths:
-      - 'scripts/**'
-      - '.github/workflows/update-price.yml'
+  schedule:
+    - cron: '0 */1 * * *'
 
 jobs:
   update-price:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: ¼ì³ö´úÂë
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: ÉèÖÃPython»·¾³
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-        
-    - name: °²×°ÒÀÀµ
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
-        
-    - name: ÔËĞĞ×¥È¡½Å±¾
-      run: |
-        cd scripts
-        python fetch_price.py
-        
-    - name: ¼ì²éÎÄ¼ş±ä»¯
-      id: git-check
-      run: |
-        git status
-        echo "changed=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
-        
-    - name: Ìá½»¸üĞÂ
-      if: steps.git-check.outputs.changed != '0'
-      run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "bot@github.com"
-        git add price.json
-        git commit -m "×Ô¶¯¸üĞÂ½ğ¼Û"
-        git push
+      - name: æ£€å‡ºä»£ç 
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: è®¾ç½®Pythonç¯å¢ƒ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: å®‰è£…ä¾èµ–
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: è¿è¡ŒæŠ“å–è„šæœ¬
+        run: |
+          python fetch_price.py
+
+      - name: æäº¤æ›´æ–°
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "bot@github.com"
+          git add price.json
+          git commit -m "è‡ªåŠ¨æ›´æ–°é‡‘ä»·" || echo "æ— æ›´æ–°å†…å®¹"
+          git push
