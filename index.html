@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇聚珠宝 - 黄金回收实时报价</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+        body{background:#f8f5f0;padding:15px}
+        .main{max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden}
+        .head{background:linear-gradient(90deg,#ffd700,#ffb300);padding:20px;text-align:center}
+        .time{font-size:14px;color:#555;margin-top:8px}
+        table{width:100%;border-collapse:collapse;margin:15px 0}
+        th,td{padding:14px;text-align:center;border-bottom:1px solid #eee}
+        th{background:#fafafa}
+        .up{font-size:19px;font-weight:bold;color:#f00}
+        .down{font-size:19px;font-weight:bold;color:#096}
+        .tip{background:#ffeb3b;padding:12px;text-align:center;font-size:14px}
+    </style>
+</head>
+<body>
+<div class="main">
+    <div class="head">
+        <h1>汇聚珠宝</h1>
+        <p>黄金·铂金·钯金·K金·白银 回收</p>
+        <div class="time" id="updateTime">加载中...</div>
+    </div>
+    <table>
+        <tr><th>品类</th><th>回收价(元/克)</th></tr>
+        <tr><td>足金999</td><td class="up" id="g999">--</td></tr>
+        <tr><td>22K金</td><td class="up" id="k22">--</td></tr>
+        <tr><td>18K金</td><td class="up" id="k18">--</td></tr>
+        <tr><td>PT999铂金</td><td class="down" id="pt">--</td></tr>
+        <tr><td>Pd990钯金</td><td class="down" id="pd">--</td></tr>
+        <tr><td>足银999</td><td class="down" id="ag">--</td></tr>
+    </table>
+    <div class="tip">以到店实时价格为准｜当面称重 全程透明无套路</div>
+</div>
+
+<script>
+// 30秒读取一次线上price.json
+function loadPrice(){
+    fetch("./price.json")
+    .then(res=>res.json())
+    .then(d=>{
+        document.getElementById("updateTime").innerText = "更新时间："+d.updateTime;
+        document.getElementById("g999").innerText = d.gold999;
+        document.getElementById("k22").innerText = d.k22;
+        document.getElementById("k18").innerText = d.k18;
+        document.getElementById("pt").innerText = d.pt999;
+        document.getElementById("pd").innerText = d.pd990;
+        document.getElementById("ag").innerText = d.silver999;
+    })
+    .catch(()=>{});
+}
+loadPrice();
+setInterval(loadPrice,30000);
+</script>
+</body>
+</html>
