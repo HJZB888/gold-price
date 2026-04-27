@@ -1,0 +1,46 @@
+name: 云端金价自动采集
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    cron: '* * * * *'
+  workflow_dispatch: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 获取融通金实时大盘
+        run: |
+          import requests, json, time
+          headers = {"User-Agent":"Mozilla/5.0"}
+          url = "https://www.rtgold.com/api/quote"
+          res = requests.get(url, headers=headers, timeout=15)
+          d = res.json()
+          gold_base = float(d["gold"])
+          pt_base = float(d["platinum"])
+          pd_base = float(d["palladium"])
+          ag_base = float(d["silver"])
+
+          resData = {
+            "updateTime": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "gold999": round(gold_base - 20),
+            "k22": round((gold_base - 20) * 0.916),
+            "k18": round((gold_base - 20) * 0.75),
+            "pt999": round(pt_base - 60),
+            "pd990": round(pd_base - 80),
+            "silver999": round(ag_base - 5)
+          }
+          with open("price.json", "w", encoding="utf-8") as f:
+              json.dump(resData, f, ensure_ascii=False, indent=2)
+        shell: python
+
+      - name: 自动提交更新
+        run: |
+          git config user.name "price-bot"
+          git config user.email "bot@github.com"
+          git add price.json
+          git commit -m "自动更新金价"
+          git push
