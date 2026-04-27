@@ -1,18 +1,23 @@
 name: 云端金价自动采集
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
   schedule:
     cron: '* * * * *'
-  workflow_dispatch: true
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: 拉取代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: 获取融通金实时大盘
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 抓取金价并写入文件
         run: |
           import requests, json, time
           headers = {"User-Agent":"Mozilla/5.0"}
@@ -37,10 +42,10 @@ jobs:
               json.dump(resData, f, ensure_ascii=False, indent=2)
         shell: python
 
-      - name: 自动提交更新
+      - name: 提交更新
         run: |
           git config user.name "price-bot"
           git config user.email "bot@github.com"
           git add price.json
-          git commit -m "自动更新金价"
+          git commit -m "自动更新金价" || echo "没有新数据，无需提交"
           git push
